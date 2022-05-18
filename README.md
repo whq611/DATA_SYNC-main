@@ -1,7 +1,7 @@
-# DATA_SYNC
+# Data-migration
 Data is migrated from MySQL and MongoDB to Postgresql
 
-# # few:
+# #few:
 This program mainly carries out the parallel migration of data from MySQL to PostgreSQL and from MongoDB to PostgreSQL. The last update time (last modification time) of data is used as the time node, and the data in a certain range can be selected for migration.
 
 Principle # # :
