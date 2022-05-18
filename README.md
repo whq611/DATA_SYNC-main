@@ -1,83 +1,78 @@
 # DATA_SYNC
-MySQL、MongoDB向Postgresql数据迁移
+Data is migrated from MySQL and MongoDB to Postgresql
 
-## remarks：
-   本程序主要进行MySQL到PostgreSQL以及MongoDB到PostgreSQL的数据平行迁移，以数据的最后更新时间（最后修改时间）作为时间节点，可选择某一区间内的数据进行迁移。
+# # few:
+This program mainly carries out the parallel migration of data from MySQL to PostgreSQL and from MongoDB to PostgreSQL. The last update time (last modification time) of data is used as the time node, and the data in a certain range can be selected for migration.
 
-## 实现原理：
-  ### MySQL ------→ PostgreSQL
-1. 基础字段：采用一对一进行映射对应，然后同步相关数据，注意源表id字段，不能直接同步到postgresql的id字段中，odoo中postgresql的id字段为自增主键，可使用其他字段来对应源表id字段，如origin_id等。 
-2. 外键字段：由于odoo中postgresql的外键字段存储主表的主键（自增id），直接同步关联关系无法关联，该程序采用两个字段（a字段，b字段）来添加关联关系，
-         a字段对应源表中外键字段，然后使用该字段值在目标表被引用的表（主表）中查询所对应的id（select id from 目标表关联主表 where origin_id = a值），origin_id为源表关联主表主键字段对应的目标表关联主表字段，由于它的唯一性，所以直接将查询出的一个id值保存到b字段（目标表新的外键字段）中即可，这样即可保证关联关系成立。
+Principle # # :
+# # # MySQL -- -- -- -- -- -- - > PostgreSQL
+1. Basic fields: Perform one-to-one mapping and synchronize related data. Note that the source table ID cannot be directly synchronized to the PostgresQL ID field.
+2. Foreign key field: ODOO postgresQL foreign key field stores primary key (self-increment ID) of primary table, direct synchronization association cannot be associated, this program uses two fields (a field, B field) to add association.
+Select origin_ID from origin_ID where origin_ID = a from origin_id where origin_ID = a from origin_id where origin_ID = a Origin_id indicates that the source table is associated with the primary table field corresponding to the primary key field of the target table. Because the original table is unique, the queried ID is stored in field B (the new foreign key field of the target table) to ensure that the association relationship is established.
 
-### MongoDB ------→ PostgreSQL
-采用一对一字段映射同步，由于文档是 MongoDB 中数据的基本单位，类似于关系数据库中的行（但是比行复杂），多个键及其关联的值有序地放在一起就构成了文档。  
- 一个文档包含一组field（字段），每一个字段都是一个key/value。key必须为字符串类型。value可以包含如下类型：
- * 基本类型，例如，string，int，float，timestamp，binary 等类型。
- * 一个文档。
- * 数组类型。  
- key即为postgresql中的字段名，value类型即为字段类型，由于postgresql不支持文档，数组等类型，因此采用text类型进行替代。另外MongoDB中如果使用的是默认的_id，它是一个ObjectId字段，postgresql不支持，采用char类型进行转换。  
-   <font color=red>本程序尚未添加MongoDB主外键关联同步，同一类不同模式的文档都放在同一个集合中。</font>
+# # # mongo -- -- -- -- -- -- - > PostgreSQL
+One-to-one field mapping synchronization is adopted. Since documents are the basic unit of data in MongoDB, similar to (but more complex than) rows in a relational database, documents are formed by placing multiple keys and their associated values together in an orderly manner.
+A document contains a set of fields, each of which is a key/value. The key must be a string. Value can contain the following types:
+* Basic types, e.g. String, int, float, timestamp, binary, etc.
+* A document.
+* Array type.
+Key is the name of a field in PostgresQL, and value is the type of a field. Postgresql does not support document and array types. Therefore, postgresQL uses text instead. In addition, if the default _id is used in MongoDB, it is an ObjectId field. Postgresql does not support this field. The char type is used for conversion.
+< font color = red > this procedure has not been added mongo main foreign key associated synchronization, the same kind of different patterns of documents on the same collection. </font>
 
-## 操作说明：
-1. 数据库信息填入，填写需要同步的源数据库相关信息以及目标数据库相关信息， 如IP地址，端口号，登录用户名，密码等，具体信息如下：
-    * 数据库名称：输入数据库名称，如test；
-    * 数据库主机（ip）：输入数据库连接ip，如localhost；
-    * 端口号：输入数据库连接端口号，如3306；
-    * 数据库登录用户名：输入数据库连接登录用户名称，如root；
-    * 数据库登录密码：输入数据库连接密码，如123456；
-    * 生效状态：是否生效；
-    * 数据库描述：添加对于该数据库的描述；
-    * 数据库类型：下拉框，选择该数据库类型，如MySQL。
+##
+1. The database information to fill in, fill out the need to synchronize of information related to the source database and target database related information, such as IP address, port number, login user name, password, etc., specific information is as follows:
+* Database name: Enter the database name, such as test;
+* Database host (IP) : Enter the database connection IP, such as localhost;
+* Port number: Enter the database connection port number, for example, 3306.
+* Database login user name: Enter the database connection login user name, such as root;
+* Database login password: Enter the database connection password, such as 123456;
+* Effective status: effective or not;
+* Database description: Add a description for the database;
+* Database type: select the database type from the drop-down list box, such as MySQL.
 
-2. 同步表信息填入，填写需要同步的源表（集合）以及目标表相关信息，如表名称等，具体信息如下：
-    * 数据库：下拉框，选择上一步中填入的数据库；
-    * 同步表名称：输入需要同步的表名称，如student；
-    * 生效状态：是否生效；
-    * 映射状态：如果该表是目标表且为配置表，可选择映射状态为True，方便主外键关联时快速查询；
-    * 表描述：添加对于该表的描述，如目标学生表；
-    * 数据库描述：自动带出。   
-    <font color=red>注意：表和数据库是一一对应的关系，即选择源数据库填写源表信息，目标数据库填写目标表信息。</font>
+2. The synchronous table information to fill in, fill in the source table needs to be synchronized (set) as well as information on the target table, such as table name, specific information is as follows:
+* Database: drop down box, select the database filled in the previous step;
+* Sync table name: Enter the name of the table to be synchronized, such as student;
+* Effective status: effective or not;
+* Mapping status: If the table is a target table and a configuration table, the mapping status can be set to True to facilitate quick query during primary and foreign key association.
+* table description: add a description of the table, such as target students table;
+* Database description: automatically bring out.
+< font color = red > note: the table and database is a one-to-one relationship, namely, select the source database fill in information of the source table, fill in information of the target table target database. </font>
 
-3. 同步表映射关系填入，选择上一步填写的同步表，目标表，然后选择同步顺序，开始以及结束同步时间， 生效状态，以及分组等信息，具体信息如下：
-    * 源同步表：选择上一步填写的表（源表）；
-    * 源同步表描述：自动带出；
-    * 目标同步表：选择上一步填写的表（目标表）；
-    * 目标同步表描述：自动带出；
-    * 同步顺序：填写同步顺序，参考：基础表（1 - 99），主表（100 - 999），从表（1000 - 9999）；
-    * 开始同步时间：选择同步数据时间区间的开始节点；
-    * 结束同步时间：选择同步数据时间区间的结束节点；
-    * 生效状态：是否生效；
-    * 分组：同步数据分组进行，共4组，对应四个定时任务，可按不同分类分组进行。
+3. Fill in the mapping relation of the synchronization table, select the synchronization table and target table filled in the previous step, and then select the synchronization sequence, start and end synchronization time, effective status, and group information as follows:
+* Source synchronization table: Select the table filled in the previous step (source table);
+* Source synchronization table description: automatically bring out;
+* Target synchronization table: Select the table filled in the previous step (target table);
+* Target synchronization table description: automatically bring out;
+* Synchronization sequence: Fill in the synchronization sequence. Refer to basic table (1-99), master table (100-999), and slave table (1000-9999).
+* Start synchronization time: Select the start node in the data synchronization time range.
+* End synchronization time: Select the end node in the data synchronization time range.
+* Effective status: effective or not;
+* Grouping: Synchronization data is grouped into four groups, corresponding to four scheduled tasks, which can be grouped according to different categories.
 
-4. 需要同步的字段映射关系填入，填写相关字段的名称，类型，以及是否是唯一字段，是否生效，以及是否是时间节点字段（最后更新（修改）时间等，具体信息如下：
-    * 同步表映射关系：下拉框，选择上一步填写的同步表映射关系；
-    * 源同步表名称：自动带出；
-    * 源同步表字段名称：填写需要同步的源表字段（单个填写），如name；
-    * 源同步表字段类型：填写源同步表字段的字段类型，如varchar；
-    * 源字段描述：填写源同步表字段的描述信息， 如源表学生姓名；
-    * 目标同步表名称：自动带出；
-    * 目标同步表字段名称：填写与源表字段对应的目标表字段（单个填写）如name；
-    * 目标同步表字段类型：填写目标同步表的字段类型，如varchar；
-    * 目标字段描述：添加目标字段的描述信息，如目标表学生 姓名；
-    * 唯一标识：唯一标识字段，即该字段是否是源表主键；
-    * 生效状态：是否生效；
-    * 时间节点：时间节点字段，如是否是最后更新（修改）时间字段。
+4. Fill in the field mapping relationship to be synchronized, and fill in the name and type of the related field, whether it is unique, whether it takes effect, and whether it is a time node field (last updated (modified) time, etc., as follows:
+* Synchronization table mapping: Select the synchronization table mapping in the previous step from the drop-down list.
+* the source synchronous table name: automatic out;
+* Source synchronization table field name: Enter the source table field to be synchronized (single field), for example, name.
+* Source synchronization table field type: Enter the field type of the source synchronization table field, such as VARCHAR.
+* Source field Description: Fill in the field description of the source synchronization table, such as the name of the student in the source table;
+* Target sync table name: automatically bring out;
+* Target synchronization table field name: Fill in the target table field corresponding to the source table field (single field), such as name;
+* Target synchronization table field type: Enter the field type of the target synchronization table, such as VARCHAR.
+* Target field description: Add the description of the target field, such as the name of the student in the target table;
+* a unique identifier: a unique identifier fields, namely whether the field source table primary key;
+* Effective status: effective or not;
+* Time node: time node field, such as whether the last updated (modified) time field.
 
-5. 目标表主外键关联关系信息填入，如主表，主表主键，从表，从表外键等（mysql-→postgresql），具体信息如下：
-    * 同步表映射关系：下拉框，选择同步表映射关系中的数据；
-    * 目标表关联主表：下拉框，选择目标表外键字段关联的主表，如teacher；
-    * 主表主键：填写目标表外键字段参考（关联）字段， 如id；
-    * 源表主键：填写源主表的主键字段在目标主表的对应字段， 如origin_id；
-    * 目标表：下拉框，选择同步的目标表，如student；
-    * 外键：填写目标表的外键字段，如teacher_id；
-    * 源表外键：填写源表的外键字段在目标表中的对应字段, 如origin_teacher_id；
-    * 生效状态：是否生效。
+Mysql -→ postgresQL; mysql-→ postgresQL; mysql-→ postgresQL;
+* Synchronization table mapping: drop down box, select synchronization table mapping data;
+* Target table associated with primary table: drop down box, select the primary table associated with the foreign key field of the target table, such as teacher;
+* the main table primary key: fill in the target table foreign key reference (associated) field, such as id;
+* Primary key of the source table: Enter the corresponding field of the primary key field of the source table in the target primary table, for example, origin_id.
+* Target table: drop down box to select synchronized target table, such as student;
+* Foreign key: Fill in the foreign key field of the target table, such as Teacher_id;
+* Source table foreign key: Enter the foreign key field of the source table in the target table, for example, origin_TEACHer_id.
+* Effective status: Whether it takes effect.
 
-6. 主外键关联任务表，由程序自动添加数据，我们可以查看相关信息，不允许新建，编辑。  
-    该部分主要显示主外键补偿任务相关信息，即当从表数据已同步，但主表数据尚未同步，主外键无法关联上时，会将相关信息保存到此处，等主表数据同步之后，使用定时任务扫描该张表，将相关主外键进行关联。
-   
-## 定时任务
-主同步任务分为四组，可根据需要进行分类分组同步，补偿任务四组，提高同步效率，MongoDB同步到PostgreSQL，无需开启补偿任务。   
-首次安装应用时定时任务默认一天执行一次，下次执行日期为应用安装日期（UTC时区），可根据需要调整参数，状态关闭，需要手动打开定时任务。      
-<font color=red>注意：odoo的定时任务时间计算为UTC时区时间，所以在调整下一执行日期时需要注意时间间隔，或者将时区时间改为当前时区时间。</font>
+6. Primary foreign key association task table, the program automatically add data, we can view the relevant information, do not allow to create, edit.
+This section mainly displays information about the primary foreign key compensation task. That is, if the data in the secondary table has been synchronized but the data in the primary table has not been synchronized and the primary foreign key cannot be associated, the related information is saved in this section. After the primary table data is synchronized, a scheduled task is used to scan the table and associate the related primary foreign keys.
