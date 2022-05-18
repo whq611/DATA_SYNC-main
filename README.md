@@ -1,16 +1,16 @@
 # Data-migration
 Data is migrated from MySQL and MongoDB to Postgresql
 
-# #few:
+# few:
 This program mainly carries out the parallel migration of data from MySQL to PostgreSQL and from MongoDB to PostgreSQL. The last update time (last modification time) of data is used as the time node, and the data in a certain range can be selected for migration.
 
 Principle # # :
-# # # MySQL -- -- -- -- -- -- - > PostgreSQL
+# MySQL -- -- -- -- -- -- - > PostgreSQL
 1. Basic fields: Perform one-to-one mapping and synchronize related data. Note that the source table ID cannot be directly synchronized to the PostgresQL ID field.
 2. Foreign key field: ODOO postgresQL foreign key field stores primary key (self-increment ID) of primary table, direct synchronization association cannot be associated, this program uses two fields (a field, B field) to add association.
 Select origin_ID from origin_ID where origin_ID = a from origin_id where origin_ID = a from origin_id where origin_ID = a Origin_id indicates that the source table is associated with the primary table field corresponding to the primary key field of the target table. Because the original table is unique, the queried ID is stored in field B (the new foreign key field of the target table) to ensure that the association relationship is established.
 
-# # # mongo -- -- -- -- -- -- - > PostgreSQL
+# mongo -- -- -- -- -- -- - > PostgreSQL
 One-to-one field mapping synchronization is adopted. Since documents are the basic unit of data in MongoDB, similar to (but more complex than) rows in a relational database, documents are formed by placing multiple keys and their associated values together in an orderly manner.
 A document contains a set of fields, each of which is a key/value. The key must be a string. Value can contain the following types:
 * Basic types, e.g. String, int, float, timestamp, binary, etc.
@@ -64,7 +64,7 @@ Key is the name of a field in PostgresQL, and value is the type of a field. Post
 * Effective status: effective or not;
 * Time node: time node field, such as whether the last updated (modified) time field.
 
-Mysql -→ postgresQL; mysql-→ postgresQL; mysql-→ postgresQL;
+5. Enter the information about the association between the primary and foreign keys of the target table, such as the primary table, primary key of the primary table, secondary table, secondary foreign key, etc.(Mysql -→ postgresQL; mysql-→ postgresQL; mysql-→ postgresQL;) as follows:
 * Synchronization table mapping: drop down box, select synchronization table mapping data;
 * Target table associated with primary table: drop down box, select the primary table associated with the foreign key field of the target table, such as teacher;
 * the main table primary key: fill in the target table foreign key reference (associated) field, such as id;
