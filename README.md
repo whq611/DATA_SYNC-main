@@ -1,10 +1,10 @@
 # Data-migration
 Data is migrated from MySQL and MongoDB to Postgresql
 
-# few:
+# remarks:
 This program mainly carries out the parallel migration of data from MySQL to PostgreSQL and from MongoDB to PostgreSQL. The last update time (last modification time) of data is used as the time node, and the data in a certain range can be selected for migration.
 
-Principle # # :
+# Principle:
 # MySQL -- -- -- -- -- -- - > PostgreSQL
 1. Basic fields: Perform one-to-one mapping and synchronize related data. Note that the source table ID cannot be directly synchronized to the PostgresQL ID field.
 2. Foreign key field: ODOO postgresQL foreign key field stores primary key (self-increment ID) of primary table, direct synchronization association cannot be associated, this program uses two fields (a field, B field) to add association.
